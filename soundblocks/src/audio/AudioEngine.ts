@@ -179,24 +179,17 @@ export class AudioEngine {
       }
     }
 
-    console.log('scheduleNote: currentSlotIndex =', this.currentSlotIndex, ', lastFilledSlotIndex =', lastFilledSlotIndex);
-
-    // If current index is beyond last filled slot, loop or stop
-    if (lastFilledSlotIndex >= 0 && this.currentSlotIndex > lastFilledSlotIndex) {
-      console.log('Beyond last filled slot - looping back to 0');
-      if (this.isLooping) {
-        this.currentSlotIndex = 0;
-      } else {
-        this.isPlaying = false;
-        if (this.schedulerTimer !== null) {
-          clearInterval(this.schedulerTimer);
-          this.schedulerTimer = null;
-        }
-        if (this.onPlaybackStop) {
-          this.onPlaybackStop();
-        }
-        return;
+    // If no filled slots, stop
+    if (lastFilledSlotIndex < 0) {
+      this.isPlaying = false;
+      if (this.schedulerTimer !== null) {
+        clearInterval(this.schedulerTimer);
+        this.schedulerTimer = null;
       }
+      if (this.onPlaybackStop) {
+        this.onPlaybackStop();
+      }
+      return;
     }
 
     const currentSlot = this.slots[this.currentSlotIndex];
@@ -251,7 +244,24 @@ export class AudioEngine {
       this.nextNoteTime += 2.0;
     }
 
+    // Move to next slot
     this.currentSlotIndex++;
+
+    // If we've gone past the last filled slot, loop or stop
+    if (this.currentSlotIndex > lastFilledSlotIndex) {
+      if (this.isLooping) {
+        this.currentSlotIndex = 0;
+      } else {
+        this.isPlaying = false;
+        if (this.schedulerTimer !== null) {
+          clearInterval(this.schedulerTimer);
+          this.schedulerTimer = null;
+        }
+        if (this.onPlaybackStop) {
+          this.onPlaybackStop();
+        }
+      }
+    }
   }
 
   // Drum machine scheduler
