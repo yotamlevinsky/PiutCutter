@@ -179,7 +179,13 @@ export function useAudioEngine() {
       const newSlots = [...prevSlots];
       const slotIndex = newSlots.findIndex(s => s.id === slotId);
       if (slotIndex !== -1) {
-        newSlots[slotIndex] = { ...newSlots[slotIndex], sample };
+        // Create a copy of the sample so each slot has its own independent instance
+        const sampleCopy = {
+          ...sample,
+          id: `${sample.id}-slot-${slotId}-${Date.now()}`,
+          waveformData: sample.waveformData ? [...sample.waveformData] : null,
+        };
+        newSlots[slotIndex] = { ...newSlots[slotIndex], sample: sampleCopy };
       }
       return newSlots;
     });
