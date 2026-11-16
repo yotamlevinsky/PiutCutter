@@ -1,5 +1,6 @@
 export interface Sample {
   id: string;
+  trackId: string;    // which track this sample came from
   startTime: number;  // in seconds
   duration: number;   // in seconds
   color: string;

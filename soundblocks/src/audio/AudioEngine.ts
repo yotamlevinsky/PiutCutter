@@ -1,9 +1,10 @@
-import type { Sample, SequencerSlot } from '../types';
+import type { Sample, SequencerSlot, AudioTrack } from '../types';
 import type { DrumKit } from './drumSounds';
 
 export class AudioEngine {
   private audioContext: AudioContext;
   private sourceBuffer: AudioBuffer | null = null;
+  private tracks: Map<string, AudioBuffer> = new Map();
   private drumKit: DrumKit | null = null;
   private scheduledNodes: AudioBufferSourceNode[] = [];
   private isPlaying = false;
@@ -40,6 +41,14 @@ export class AudioEngine {
     return this.sourceBuffer;
   }
 
+  addTrack(trackId: string, buffer: AudioBuffer): void {
+    this.tracks.set(trackId, buffer);
+  }
+
+  getTrackBuffer(trackId: string): AudioBuffer | null {
+    return this.tracks.get(trackId) || null;
+  }
+
   getAudioContext(): AudioContext {
     return this.audioContext;
   }
@@ -70,7 +79,8 @@ export class AudioEngine {
 
   // Preview a sample segment
   async previewSample(sample: Sample): Promise<void> {
-    if (!this.sourceBuffer) return;
+    const trackBuffer = this.getTrackBuffer(sample.trackId);
+    if (!trackBuffer) return;
 
     await this.initialize();
 
@@ -78,7 +88,7 @@ export class AudioEngine {
     this.stopAllScheduledNodes();
 
     const source = this.audioContext.createBufferSource();
-    source.buffer = this.sourceBuffer;
+    source.buffer = trackBuffer;
 
     // Apply fade envelope to prevent clicks
     const gainNode = this.audioContext.createGain();
@@ -197,8 +207,30 @@ export class AudioEngine {
     // Only schedule if there's a sample
     if (currentSlot && currentSlot.sample) {
       const sample = currentSlot.sample;
+      const trackBuffer = this.getTrackBuffer(sample.trackId);
+      if (!trackBuffer) {
+        // Track buffer not found, skip this slot
+        this.nextNoteTime += 2.0;
+        this.currentSlotIndex++;
+        if (this.currentSlotIndex > lastFilledSlotIndex) {
+          if (this.isLooping) {
+            this.currentSlotIndex = 0;
+          } else {
+            this.isPlaying = false;
+            if (this.schedulerTimer !== null) {
+              clearInterval(this.schedulerTimer);
+              this.schedulerTimer = null;
+            }
+            if (this.onPlaybackStop) {
+              this.onPlaybackStop();
+            }
+          }
+        }
+        return;
+      }
+
       const source = this.audioContext.createBufferSource();
-      source.buffer = this.sourceBuffer;
+      source.buffer = trackBuffer;
 
       // Apply fade envelope to prevent clicks
       const gainNode = this.audioContext.createGain();

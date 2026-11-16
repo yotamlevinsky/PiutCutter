@@ -87,6 +87,7 @@ export function useAudioEngine() {
         setTracks([initialTrack]);
         setCurrentTrackId('default');
         engine.setSourceBuffer(audioBuffer);
+        engine.addTrack('default', audioBuffer);
         console.log('Waveform generated');
 
         // Generate drum kit
@@ -145,10 +146,11 @@ export function useAudioEngine() {
   }, []);
 
   const createSampleFromCutter = useCallback((): Sample | null => {
-    if (!sourceBuffer) return null;
+    if (!sourceBuffer || !currentTrackId) return null;
 
     const sample: Sample = {
       id: `sample-${Date.now()}-${Math.random()}`,
+      trackId: currentTrackId,
       startTime: cutterPosition.startTime,
       duration: cutterPosition.duration,
       color: getNextSampleColor(),
@@ -161,7 +163,7 @@ export function useAudioEngine() {
     };
 
     return sample;
-  }, [sourceBuffer, cutterPosition]);
+  }, [sourceBuffer, currentTrackId, cutterPosition]);
 
   const addSampleToLibrary = useCallback(() => {
     const sample = createSampleFromCutter();
@@ -319,6 +321,7 @@ export function useAudioEngine() {
       setTracks(prev => [...prev, newTrack]);
       setCurrentTrackId(newTrack.id);
       audioEngineRef.current.setSourceBuffer(audioBuffer);
+      audioEngineRef.current.addTrack(newTrack.id, audioBuffer);
 
       console.log('Track uploaded:', file.name);
     } catch (error) {
@@ -331,6 +334,7 @@ export function useAudioEngine() {
     if (track && audioEngineRef.current) {
       setCurrentTrackId(trackId);
       audioEngineRef.current.setSourceBuffer(track.buffer);
+      audioEngineRef.current.addTrack(track.id, track.buffer);
       // Reset cutter position when switching tracks
       setCutterPosition({
         startTime: 0,
