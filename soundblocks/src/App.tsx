@@ -82,33 +82,30 @@ function App() {
           onRemoveTrack={removeTrack}
         />
 
-        {/* Sample Library + Sequencer side by side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Sample Library - left side */}
-          <SampleLibrary
-            samples={librarySamples}
-            onRemoveSample={removeSampleFromLibrary}
-            onDragStart={handleLibrarySampleDragStart}
-          />
+        {/* Sample Library */}
+        <SampleLibrary
+          samples={librarySamples}
+          onRemoveSample={removeSampleFromLibrary}
+          onDragStart={handleLibrarySampleDragStart}
+        />
 
-          {/* Sequencer - right side */}
-          <Sequencer
-            slots={slots}
-            isPlaying={isPlaying}
-            isLooping={isLooping}
-            currentSlot={currentSlot}
-            onPlay={play}
-            onStop={stop}
-            onToggleLoop={toggleLoop}
-            onRemoveSample={removeSampleFromSlot}
-            onReplaceSample={replaceSampleInSlot}
-            onMoveSample={moveSample}
-            onLibrarySampleDrop={handleLibrarySampleDrop}
-            draggedLibrarySample={draggedLibrarySample}
-          />
-        </div>
+        {/* Sequencer */}
+        <Sequencer
+          slots={slots}
+          isPlaying={isPlaying}
+          isLooping={isLooping}
+          currentSlot={currentSlot}
+          onPlay={play}
+          onStop={stop}
+          onToggleLoop={toggleLoop}
+          onRemoveSample={removeSampleFromSlot}
+          onReplaceSample={replaceSampleInSlot}
+          onMoveSample={moveSample}
+          onLibrarySampleDrop={handleLibrarySampleDrop}
+          draggedLibrarySample={draggedLibrarySample}
+        />
 
-        {/* Drum Machine - at the bottom */}
+        {/* 808 Drum Machine */}
         <DrumMachine
           pattern={drumPattern}
           currentStep={currentDrumStep}
