@@ -1,4 +1,4 @@
-import type { Sample, SequencerSlot, AudioTrack } from '../types';
+import type { Sample, SequencerSlot } from '../types';
 import type { DrumKit } from './drumSounds';
 
 export class AudioEngine {
